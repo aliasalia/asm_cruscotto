@@ -189,15 +189,16 @@ void main(int argc, char *argv[])
                     else
                         printf(": %s", user_mods_get(&utente, index));
 
-                    scanf("%c", &c);
+                    char n;
+                    scanf("%c", &n);
                     //TODO not working
                     //* change the changable settings for ON/OFF
-                    if ((c == 'A' || c == 'B') && index == 2)
+                    if ((n == 'A' || n == 'B') && index == 2)
                     {
                         strcpy(utente.blocco_porte, change_on_off(utente.blocco_porte));
                         printf("%s: %s", user_mods(index), utente.blocco_porte);
                     }
-                    else if ((c == 'A' || c == 'B') && index == 3)
+                    else if ((n == 'A' || n == 'B') && index == 3)
                     {
                         strcpy(utente.back_home, change_on_off(utente.back_home));
                         printf("%s: %s", user_mods(index), utente.back_home);
