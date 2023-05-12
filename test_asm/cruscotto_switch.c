@@ -3,8 +3,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define end_supervisor 6
-#define end_user 4
+#define end_supervisor 8
+#define end_user 6
 
 void index_position_message(int index, int supervisor)
 {
@@ -59,6 +59,61 @@ void index_position_default_value(int index)
     }
 }
 
+void index_to_end(int supervisor, int *index)
+{
+    if (supervisor == 1)
+        index = end_supervisor;
+    else    
+        index = end_user;
+}
+
+void rollback_and_forward(int *index, char c)
+{
+    scanf("%c", &c);
+    if (c == '\033')
+    {
+        scanf("%c", &c);
+        if (c == '[')
+        {
+            scanf("%c", &c);
+            if (c == 'A') //* up
+            {
+                if (index == 0)
+                    index_to_end(&index);
+                else
+                    index -= 1;
+            }
+            else if (c == 'B') //* down
+            {
+                if (index == end_user || index == end_supervisor)
+                    index = 0;
+                else
+                    index++;
+            }
+        }
+    }
+}
+
+void go_to_sub_menu(int *index, char *n)
+{
+    scanf("%c", &n);
+    if (n == '\033')
+    {
+        scanf("%c", &n);
+        if (n == '[')
+        {
+            scanf("%c", &n);
+            if (n == 'C') //* right
+            {
+                if (index == 0)
+                    index_to_end(&index);
+                else
+                    index -= 1;
+            }
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {
     //* check if is supervisor
@@ -66,24 +121,11 @@ int main(int argc, char *argv[])
     for (unsigned int i = 0; i < argc; i++)
         if (strcmp(argv[i], "2244") == 0)
             supervisor = 1;
-
-    int indexes[] = {1, 2, 3, 4, 5, 6, 7, 8};
+            
     int index = 1;
     char c;
     while (true)
     {
-        scanf("%c", &c);
-        if (c == '\033')
-        {
-            scanf("%c", &c);
-            if (c == '[')
-            {
-                scanf("%c", &c);
-                //* rollback and forward the menu settings
-                if (c == 'A')
-                {
-                }
-            }
-        }
+        
     }
 }
