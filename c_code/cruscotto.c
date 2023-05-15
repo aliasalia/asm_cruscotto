@@ -92,7 +92,7 @@ void index_position_message(int supervisor) {
 void navigate_menu(int supervisor) {
     int read = move();
     printf("Read: %d\n", read);
-    if (read == 2 && ind != 2 && ind != 3 && ind != 6)
+    if (read == 2 && ind != 1 && ind != 2 && ind != 3 && ind != 6)
         sub = 1;
     else if (read != 2) {
         ind += read;
