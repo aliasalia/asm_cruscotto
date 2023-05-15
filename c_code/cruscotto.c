@@ -47,7 +47,7 @@ void index_position_message(int supervisor) {
                 sub = 0;
             }
             else {
-                if (back_home)
+                if (door_lock)
                     printf("4. Blocco automatico porte: ON");
                 else
                     printf("4. Blocco automatico porte: OFF");
