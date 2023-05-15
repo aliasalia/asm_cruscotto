@@ -6,6 +6,7 @@ int ind = 1;
 int sub = 0;
 int door_lock = 1;
 int back_home = 1;
+int frecce = 3;
 
 int move() {
     char c;
@@ -23,6 +24,16 @@ int move() {
         }
     }
     return 0;
+}
+
+void set_blinkers(int set)
+{
+    if (set > 5)
+        frecce = 5;
+    else if (set < 2)
+        frecce = 2;
+    else
+        frecce = set;
 }
 
 void index_position_message(int supervisor) {
@@ -72,7 +83,10 @@ void index_position_message(int supervisor) {
             break;
         case 7:
             if (sub) {
-                //scanf(...);
+                int n;
+                scanf("%d", &n);
+                set_blinkers(n);
+                printf("7. Frecce direzione: %d", frecce);
                 sub = 0;
             }
             else {
