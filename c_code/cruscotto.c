@@ -104,14 +104,18 @@ void navigate_menu(int supervisor) {
         sub = 1;
     else if (read != 2) {
         ind += read;
-        if (supervisor && (ind < 1))
-            ind = 8;
-        else if (supervisor && (ind > 8))
-            ind = 1;
-        else if (!supervisor && ind < 1)
-            ind = 6;
-        else if (!supervisor && ind > 6)
-            ind = 1;
+        if (supervisor) {
+            if (ind < 1)
+                ind = 8;
+            else if (ind > 8)
+                ind = 1;
+        }
+        else {
+            if (ind < 1)
+                ind = 6;
+            else if (ind > 6)
+                ind = 1;
+        }
     }
     index_position_message(supervisor);
 }
@@ -124,9 +128,8 @@ int main(int argc, char *argv[]) {
 
     index_position_message(supervisor);
 
-    while (1) {
+    while (1)
         navigate_menu(supervisor);
-    }
 
     return 0;
 }
