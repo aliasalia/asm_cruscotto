@@ -3,83 +3,86 @@
 #####################
 
 .section .data
-    format_char db "%c", 0     ; Format string for reading a single character
+    format_char: .string "%c"   # Format string for reading a single character
+    target_char: .byte 'a'      # The target character to detect
 
 .section .text
-global _move
+    .global move
 
-_move:
-    ; Function prologue
-    push ebp
-    mov ebp, esp
+    .type move, @function       # Function declaration
 
-    ; Variable declarations
-    sub esp, 8                 ; Allocate space for 'c' and 'tmp'
-    mov edx, esp               ; Address of 'c'
-    mov eax, edx               ; Address of 'tmp'
+move:
+    # function prologue ??
+    pushl %ebp
+    mov %esp, %ebp
 
-    ; Read the first character
-    lea eax, [format_char]
-    push eax                   ; Push the address of the format string
-    push edx                   ; Push the address of 'c'
-    call scanf                 ; Call scanf function
-    add esp, 8                 ; Clean up the stack
+    # variable declarations
+    sub $8, %esp                
+    mov %esp, %edx              # c
+    mov %edx, %eax              # tmp ????
 
-    ; Check for escape character '\033'
-    cmp byte [edx], 27
+    # read the first character
+    lea format_char, %eax
+    pushl %edx                  # push the address of 'c'
+    pushl %eax                  # push the address of the format string
+    call scanf                  # call scanf
+    add $8, %esp                # clean up the stack
+
+    # check for escape character '\033'
+    cmpb $27, (%edx)
     jne .not_escape
 
-    ; Read the second character
-    push eax                   ; Preserve the result of the first scanf
-    push edx                   ; Push the address of 'c'
-    call scanf                 ; Call scanf function
-    add esp, 8                 ; Clean up the stack
+    # read char (should be '[')
+    pushl %edx                  # push the address of 'c'
+    pushl %eax                  # push the address of the format string
+    call scanf                  # call scanf function
+    add $8, %esp                # clean up the stack
 
-    ; Check for '[' character
-    cmp byte [edx], '['
+    # check if true
+    cmpb $'[', (%edx)
     jne .not_escape
 
-    ; Read the third and fourth characters
-    push eax                   ; Preserve the result of the second scanf
-    push edx                   ; Push the address of 'c'
-    call scanf                 ; Call scanf function
-    add esp, 8                 ; Clean up the stack
+    # read letter (es. A)
+    pushl %edx                  
+    pushl %eax                  
+    call scanf                                  
 
-    push eax                   ; Preserve the result of the third scanf
-    push edx                   ; Push the address of 'tmp'
-    call scanf                 ; Call scanf function
-    add esp, 8                 ; Clean up the stack
+    # reading the tmp part ??? maybe in the next part compare the tmp instead of the c
+    pushl %edx                  
+    pushl %eax                  
+    call scanf                  
+    add $8, %esp                
 
-    ; Check for different movement keys
-    cmp byte [edx], 'A'
+    # check wich key has been pressed
+    cmpb $'A', (%edx)
     je .up
-    cmp byte [edx], 'B'
+    cmpb $'B', (%edx)
     je .down
-    cmp byte [edx], 'C'
+    cmpb $'C', (%edx)
     je .right
 
 .not_escape:
-    ; Return 0
-    xor eax, eax
+    # return 0
+    xor %eax, %eax
     jmp .end
 
 .up:
-    ; Return -1
-    mov eax, -1
+    # return -1
+    mov $-1, %eax
     jmp .end
 
 .down:
-    ; Return 1
-    mov eax, 1
+    # return 1
+    mov $1, %eax
     jmp .end
 
 .right:
-    ; Return 2
-    mov eax, 2
+    # return 2
+    mov $2, %eax
     jmp .end
 
 .end:
-    ; Function epilogue
-    mov esp, ebp
-    pop ebp
+    # end of function
+    mov %ebp, %esp
+    popl %ebp
     ret
