@@ -3,13 +3,12 @@
 #####################
 
 .section .data
-    format_char: .string "%c"   # Format string for reading a single character
-    target_char: .byte 'a'      # The target character to detect
+    format_char: .string "%c"   # format string for reading a single character
 
 .section .text
     .global move
 
-    .type move, @function       # Function declaration
+    .type move, @function       # function declaration
 
 move:
     # function prologue ??
