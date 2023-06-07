@@ -1,6 +1,6 @@
 EXE= eseguibile
 AS= as --32
-LD= ld -m elf_i386
+LD= ld -dynamic-linker /lib/ld-linux.so.2 -lc -m elf_i386
 FLAGS= -gstabs
 OBJ= main.o move.o
 
