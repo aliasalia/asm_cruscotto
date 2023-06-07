@@ -3,8 +3,10 @@
 ###########################
 
 .section .data
-    format_char: .string "%c"   # format string for reading a single character
-    format_int: .string "%d"    # format string for reading an int val
+    c:              .long 0
+    c_length:       .long . - c
+    tmp:            .ascii "0"
+    tmp_length:     .long . - tmp
 
 .section .text
     .global set_blinkers
@@ -12,33 +14,38 @@
     .type set_blinkers, @function       # function declaration
 
 set_blinkers:
-    sub $8, %esp
-    mov %esp, %edx      # n
-    mov %edx, %eax      # tmp
+    movl $3, %eax           # scanf number
+    movl $0, %ebx
+    leal c, %ecx
+    movl c_length, %edx
+    int $0x80               # Invoke the Linux kernel to perform system call
 
-    lea format_int, %eax
-    pushl %edx                  # push the address of 'c'
-    pushl %eax                  # push the address of the format string
-    call scanf                  # call scanf
-    add $8, %esp                # clean up the stack
+    movl $3, %eax           # scanf blank char (end of string)
+    movl $0, %ebx
+    leal tmp, %ecx
+    movl tmp_length, %edx
+    int $0x80               # Invoke the Linux kernel to perform system call
 
-    cmp $5, (%edx)
+    cmpl $5, (%ecx)
     jg  .greater_5
-    jl  .lower_2
-    jmp .else
+    cmpl $2, (%ecx)
+    jl  .less_2
+    jmp .end
 
     # end of function
     mov %ebp, %esp
     popl %ebp
     ret
 
-.greater_5
-    # movl $5, blinkers
+.greater_5:
+    # movl $5, %ecx
+    jmp .end
 
-.less_2
-    # movl $2, blinkers
+.less_2:
+    # movl $2, %ecx
+    jmp .end
 
-.else:    
-    # movl (%edx), blinkers
+.end:
+    ret
 
     

@@ -3,76 +3,58 @@
 #####################
 
 .section .data
-    format_char:    .string "%c"   # format string for reading a single character
-    c:              .ascii
-    tmp:            .ascii     
+    c:              .ascii ""
+    c_length:       .long . - c
+    tmp:            .ascii ""
+    tmp_length:     .long . - tmp
 
 .section .text
-    .global move
+    .global _move
 
-    .type move, @function       # function declaration
+    #.type move, @function       # function declaration
 
-move:
-    movl c, %ecx
-
-    movl $3, %eax
+_move:
+    movl $3, %eax           # scanf first char
     movl $0, %ebx
     leal c, %ecx
-    movl $1, %edx
+    movl c_length, %edx
+    int $0x80               # invoke the Linux kernel to perform system call
 
-    # give space on the stack
-    pushl %ebp
-    movl %esp, %ebp
+    movl (%ecx), %eax        # move the character to %eax
 
-    # variable declarations
-    sub $8, %esp                
-    movl %esp, %edx              # c
-    movl %edx, %eax              # tmp
+    cmpl $27, %eax           # cmp '\033' to %eax
+    jne .end
 
-    # read the first character
-    leal format_char, %eax
-    pushl %edx                  # push the address of 'c'
-    pushl %eax                  # push the address of the format string
-    call scanf                  # call scanf
-    add $8, %esp                # clean up the stack
+    movl $3, %eax           # scanf second char
+    movl $0, %ebx
+    leal c, %ecx
+    movl c_length, %edx
+    int $0x80               # invoke the Linux kernel to perform system call
 
-    # check for escape character '\033'
-    cmpb $27, (%edx)
-    jne .not_escape
+    movl (%ecx), %eax        # move the character to %eax
 
-    # read second char
-    pushl %edx                  # push the address of 'c'
-    pushl %eax                  # push the address of the format string
-    call scanf                  # call scanf function
-    add $8, %esp                # clean up the stack
+    cmpl $'[', %eax          # cmp '[' to %eax
+    jne .end
 
-    # check if id '['
-    cmpb $'[', (%edx)
-    jne .not_escape
+    movl $3, %eax           # scanf third char (A B or C)
+    movl $0, %ebx
+    leal c, %ecx
+    movl c_length, %edx
+    int $0x80               # Invoke the Linux kernel to perform system call
 
-    # read letter (es. A)
-    pushl %edx                  
-    pushl %eax                  
-    call scanf                                  
-
-    # reading the tmp part
-    pushl %edx                  
-    pushl %eax                  
-    call scanf                  
-    add $8, %esp                
+    movl $3, %eax           # scanf last blank char (end of string)
+    movl $0, %ebx
+    leal tmp, %ecx
+    movl tmp_length, %edx
+    int $0x80               # Invoke the Linux kernel to perform system call
 
     # check wich key has been pressed
-    cmpb $'A', (%edx)
+    cmpl $'A', (%ecx)
     je .up
-    cmpb $'B', (%edx)
+    cmpl $'B', (%ecx)
     je .down
-    cmpb $'C', (%edx)
+    cmpl $'C', (%ecx)
     je .right
-
-.not_escape:
-    # return 0
-    xor %eax, %eax
-    jmp .end
 
 .up:
     # return -1
@@ -91,6 +73,4 @@ move:
 
 .end:
     # end of function
-    movl %ebp, %esp
-    popl %ebp
     ret

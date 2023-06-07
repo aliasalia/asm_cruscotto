@@ -22,11 +22,9 @@ _start:
 #    call navigate_menu
 #    jmp .loop
 
-call  move              # chiamata alla funzione _move
+    #call  move              # chiamata alla funzione _move
 
 
-# syscall EXIT
-xorl %eax, %eax         # azzera eax
-inc %eax                # incr. eax di 1 (1 e' il codice della exit)          
-xorl %ebx, %ebx         # azzera ebx (alla exit viene passato 0)           
-int $0x80               # invoca la funzione exit
+    movl $1, %eax			# syscall EXIT
+	movl $0, %ebx			# codice di uscita 0
+	int $0x80				# eseguo la syscall
