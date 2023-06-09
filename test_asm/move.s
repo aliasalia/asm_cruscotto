@@ -3,9 +3,9 @@
 #####################
 
 .section .data
-    c:              .ascii ""
+    c:              .ascii "0"
     c_length:       .long . - c
-    tmp:            .ascii ""
+    tmp:            .ascii "0"
     tmp_length:     .long . - tmp
 
 .section .text
@@ -20,9 +20,7 @@ _move:
     movl c_length, %edx
     int $0x80               # invoke the Linux kernel to perform system call
 
-    movl (%ecx), %eax        # move the character to %eax
-
-    cmpl $27, %eax           # cmp '\033' to %eax
+    cmpl $27, %ecx           # cmp '\033' to %eax
     jne .end
 
     movl $3, %eax           # scanf second char
@@ -31,9 +29,7 @@ _move:
     movl c_length, %edx
     int $0x80               # invoke the Linux kernel to perform system call
 
-    movl (%ecx), %eax        # move the character to %eax
-
-    cmpl $'[', %eax          # cmp '[' to %eax
+    cmpl $'[', %ecx          # cmp '[' to %eax
     jne .end
 
     movl $3, %eax           # scanf third char (A B or C)
@@ -42,18 +38,12 @@ _move:
     movl c_length, %edx
     int $0x80               # Invoke the Linux kernel to perform system call
 
-    movl $3, %eax           # scanf last blank char (end of string)
-    movl $0, %ebx
-    leal tmp, %ecx
-    movl tmp_length, %edx
-    int $0x80               # Invoke the Linux kernel to perform system call
-
     # check wich key has been pressed
-    cmpl $'A', (%ecx)
+    cmpl $'A', %ecx
     je .up
-    cmpl $'B', (%ecx)
+    cmpl $'B', %ecx
     je .down
-    cmpl $'C', (%ecx)
+    cmpl $'C', %ecx
     je .right
 
 .up:
