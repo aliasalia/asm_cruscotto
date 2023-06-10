@@ -18,13 +18,13 @@ blinkers:   .long 3
 _start:
 # check if is supervisor TODO
 
-#.loop
+#loop:
 #    call navigate_menu
 #    jmp .loop
 
     #call  move              # chiamata alla funzione _move
 
-
+end:
     movl $1, %eax			# syscall EXIT
 	movl $0, %ebx			# codice di uscita 0
 	int $0x80				# eseguo la syscall
