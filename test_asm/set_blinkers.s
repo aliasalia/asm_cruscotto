@@ -9,14 +9,14 @@
 .section .text
     .global _start
     
-    #.type set_blinkers, @function       # function declaration
+    #.type set_blinkers, @function      
 
 _start:
-    movl $3, %eax           # scanf number
+    movl $3, %eax           
     movl $0, %ebx
     leal c, %ecx
     movl c_length, %edx
-    int $0x80               # Invoke the Linux kernel to perform system call 
+    int $0x80               
 
     xorl %ecx, %ecx
     movl c, %ecx
@@ -24,16 +24,22 @@ _start:
 
     cmp $5, %cl
     jg  greater_5
-    cmp $2, %cl
-    jl  less_2
-    jmp end
+    jmp maybe_less_2
 
 greater_5:
     movl $5, %ecx
     jmp end
 
+maybe_less_2:
+    cmp $2, %cl
+    jl  less_2
+    jmp between
+
 less_2:
     movl $2, %ecx
+    jmp end
+
+between:
     jmp end
 
 end:
@@ -47,7 +53,7 @@ end:
 	int $0x80
 
     #ret
-    movl $1, %eax			# syscall EXIT
-	movl $0, %ebx			# codice di uscita 0
-	int $0x80				# eseguo la syscall
+    movl $1, %eax			
+	movl $0, %ebx			
+	int $0x80				
     
