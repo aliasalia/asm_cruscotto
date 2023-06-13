@@ -28,6 +28,7 @@ _start:
 
 greater_5:
     movl $5, %ecx
+    addl $256, %ecx
     jmp end
 
 maybe_less_2:
@@ -37,6 +38,7 @@ maybe_less_2:
 
 less_2:
     movl $2, %ecx
+    addl $256, %ecx
     jmp end
 
 between:
