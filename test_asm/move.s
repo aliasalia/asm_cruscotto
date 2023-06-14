@@ -6,39 +6,52 @@
     c:              .ascii "0"
     c_length:       .long . - c
     up:             .ascii "A"
-    up_length:      .long . -up
+    up_length:      .long . - up
     down:           .ascii "B"
-    down_length:    .long . -down
+    down_length:    .long . - down
     right:          .ascii "C"
-    right_length:   .long . -right
+    right_length:   .long . - right
 
 .section .text
-    .global _start
+    .global move
 
-    #.type move, @function       # function declaration
+    .type move, @function      
 
-_start:
-    movl $3, %eax           # scanf first char
+move:
+    movl $3, %eax           
     movl $0, %ebx
     leal c, %ecx
     movl c_length, %edx
-    int $0x80               # invoke the Linux kernel to perform system call
+    int $0x80  
+
+    movl $3, %eax           
+    movl $0, %ebx
+    leal c, %ecx
+    movl c_length, %edx
+    int $0x80         
+
+    movl $3, %eax           
+    movl $0, %ebx
+    leal c, %ecx
+    movl c_length, %edx
+    int $0x80             
+
+    xorl %ecx, %ecx
+    movl c, %ecx
 
     movl up, %eax
     cmpl %eax, %ecx
     je is_up
-    xor %eax, %eax
     movl down, %eax
     cmpl %eax, %ecx
     je is_down
-    xor %eax, %eax
     movl right, %eax
     cmpl %eax, %ecx
-    je right
+    je is_right
 
 is_up:
-    # return -1
-    movl $-1, %eax
+    # return 0
+    movl $0, %eax
     jmp end
 
 is_down:
@@ -47,13 +60,23 @@ is_down:
     jmp end
 
 is_right:
-    # return 2
-    movl $2, %eax
+    # return 1 to navigate in %ecx => sub = 1
+    movl $1, %ecx
     jmp end
 
 end:
+    #addl $256, %eax
+    #addl $48, %eax
+    #movl %eax, c
+
+    #movl $4, %eax
+	#movl $1, %ebx
+	#leal c, %ecx
+	#movl c_length, %edx
+	#int $0x80
+
     # end of function
-    #ret
-    movl $1, %eax			
-	movl $0, %ebx			
-	int $0x80	
+    ret
+    #movl $1, %eax			
+	#movl $0, %ebx			
+	#int $0x80	

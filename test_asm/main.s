@@ -4,6 +4,9 @@
 
 .section .data
 supervisor: .long 0
+sup_length: .long . - supervisor
+sup_code:   .ascii "2244"
+supc_length: .long . - sup_code
 ind:        .long 1
 sub:        .long 0
 door_lock:  .long 1
@@ -17,12 +20,36 @@ blinkers:   .long 3
 
 _start:
 # check if is supervisor TODO
+    movl 8(%esp), %eax
+    movl (%eax), %ebx
+    movl sup_code, %eax
+    cmp %eax, %ebx
+    je is_supervisor
+    movl %ebx, supervisor
+    jmp continue
 
-#loop:
-#    call navigate_menu
-#    jmp .loop
+continue:
+    movl $4, %eax
+	movl $1, %ebx
+	leal supervisor, %ecx
+	movl sup_length, %edx
+	int $0x80
+    jmp end
 
-    #call  move              # chiamata alla funzione _move
+is_supervisor:
+    movl $1, %eax
+    addl $256, %eax
+    addl $48, %eax
+    movl %eax, supervisor
+    jmp continue
+
+# call index_position_message
+
+loop:
+    movl ind, %eax
+    movl supervisor, %ebx
+    #call navigate_menu
+    jmp loop
 
 end:
     movl $1, %eax			# syscall EXIT

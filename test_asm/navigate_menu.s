@@ -4,6 +4,7 @@
 
 .section .data
     ind:        .long 1
+    ind_length: .long . - ind
     supervisor: .long 0
     max:        .long 6
     down:       .long 1
@@ -11,19 +12,20 @@
     
 
 .section .text
-    .global navigate_menu
+    .global _start
 
-navigate_menu:
-    movl %eax, ind
-    movl %ebx, supervisor
+_start:
+    movl %eax, ind          # get from %eax the current index
+    movl %ebx, supervisor   # get from %ebx if is supervisor
     cmp $1, %ebx
     je is_supervisor
 
     call move
-    movl %eax, down
-    movl %ecx, sub
-    cmp $2, %ecx
+    movl %eax, down         # get from %eax 1 if down 0 if up         
+    movl %ecx, sub          # get from %ecx 1 if is submenu
+    cmp $1, %ecx
     jne up_down
+    jmp end
 
 is_supervisor:
     movl $8, max
@@ -42,11 +44,13 @@ increment:
 
 is_max:
     movl $1, %ebx       # returns 1 in %ebx
-    ret
+    #ret
+    jmp end
 
 not_max:
     addl $1, %ebx       # add 1 to current index
-    ret
+    #ret
+    jmp end
 
 decrement:
     movl ind, %ebx
@@ -56,8 +60,27 @@ decrement:
 
 is_top:
     movl max, %ebx       # returns max (last index)
-    ret
+    #ret
+    jmp end
 
 not_top:
     subl $1, %ebx       # subtract 1 to current index
+    #ret
+    jmp end
+
+end:
     ret
+    #addl $256, %ebx
+    #addl $48, %ebx
+    #movl %ebx, ind
+
+    #movl $4, %eax
+	#movl $1, %ebx
+	#leal ind, %ecx
+	#movl ind_length, %edx
+	#int $0x80
+
+    # end of function
+    #movl $1, %eax			
+	#movl $0, %ebx			
+	#int $0x80	
