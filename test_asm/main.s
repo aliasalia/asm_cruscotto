@@ -22,6 +22,11 @@ _start:
 
     movb ind, %eax
     movb supervisor, %ebx
+    movb door_lock, %esp
+    movb back_home, 4(%esp)
+    movb sub, %ecx
+    movb blinkers, 8(%esp)
+
     call index_position_message
     jmp loop
 
@@ -33,20 +38,20 @@ maybe_supervisor:
     je is_supervisor
 
 loop:
-    movb ind, %ah
-    movb supervisor, %al
-    movb door_lock, %cl
-    movb back_home, %bh
-    movb sub, %bl
-    movb blinkers, %ch
+    movb ind, %eax
+    movb supervisor, %ebx
+    movb door_lock, %esp
+    movb back_home, 4(%esp)
+    movb sub, %ecx
+    movb blinkers, 8(%esp)
 
     call navigate_menu
 
-    movb %ah, ind
-    movb %al, supervisor
+    movb %eax, ind
+    movb %ebx, supervisor
     movb %cl, door_lock
     movb %bh, back_home
-    movb %bl, sub
+    movb %ecx, sub
     movb %ch, blinkers
     jmp loop
 

@@ -46,7 +46,7 @@
 
 index_position_message:
 
-    movb %ah, ind
+    #movb %ah, ind
     cmpl $1, %eax
     je is_1
     cmpl $2, %eax
