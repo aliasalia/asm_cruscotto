@@ -3,53 +3,56 @@
 ####################
 
 .section .data
-supervisor: .long 0
-sup_length: .long . - supervisor
+supervisor: .byte 0
 sup_code:   .ascii "2244"
-supc_length: .long . - sup_code
-ind:        .long 1
-sub:        .long 0
-door_lock:  .long 1
-back_home:  .long 1
-blinkers:   .long 3
+ind:        .byte 1
+sub:        .byte 0
+door_lock:  .byte 1
+back_home:  .byte 1
+blinkers:   .byte 3
 
 .section .text
     .global _start
 
-    .type _start, @function
-
 _start:
-# check if is supervisor TODO
+    # check if is supervisor
+    movl %esp, %eax
+    cmp $1, %eax
+    jg maybe_supervisor
+
+    movb ind, %eax
+    movb supervisor, %ebx
+    call index_position_message
+    jmp loop
+
+maybe_supervisor:
     movl 8(%esp), %eax
     movl (%eax), %ebx
     movl sup_code, %eax
     cmp %eax, %ebx
     je is_supervisor
-    movl %ebx, supervisor
-    jmp continue
-
-continue:
-    movl $4, %eax
-	movl $1, %ebx
-	leal supervisor, %ecx
-	movl sup_length, %edx
-	int $0x80
-    jmp end
-
-is_supervisor:
-    movl $1, %eax
-    addl $256, %eax
-    addl $48, %eax
-    movl %eax, supervisor
-    jmp continue
-
-# call index_position_message
 
 loop:
-    movl ind, %eax
-    movl supervisor, %ebx
-    #call navigate_menu
+    movb ind, %ah
+    movb supervisor, %al
+    movb door_lock, %cl
+    movb back_home, %bh
+    movb sub, %bl
+    movb blinkers, %ch
+
+    call navigate_menu
+
+    movb %ah, ind
+    movb %al, supervisor
+    movb %cl, door_lock
+    movb %bh, back_home
+    movb %bl, sub
+    movb %ch, blinkers
     jmp loop
+
+is_supervisor:
+    movb $1, %al
+    movb %al, supervisor
 
 end:
     movl $1, %eax			# syscall EXIT

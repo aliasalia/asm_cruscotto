@@ -52,31 +52,14 @@ move:
 is_up:
     # return 0
     movl $0, %eax
-    jmp end
+    ret
 
 is_down:
     # return 1
     movl $1, %eax
-    jmp end
+    ret
 
 is_right:
-    # return 1 to navigate in %ecx => sub = 1
-    movl $1, %ecx
-    jmp end
-
-end:
-    #addl $256, %eax
-    #addl $48, %eax
-    #movl %eax, c
-
-    #movl $4, %eax
-	#movl $1, %ebx
-	#leal c, %ecx
-	#movl c_length, %edx
-	#int $0x80
-
-    # end of function
+    # return 1 to navigate in %bl => sub = 1
+    movb $1, %bl
     ret
-    #movl $1, %eax			
-	#movl $0, %ebx			
-	#int $0x80	

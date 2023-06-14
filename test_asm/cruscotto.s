@@ -1,1 +1,0 @@
-scriveremo qualcosa in un futuro sperabilmente non troppo lontano
