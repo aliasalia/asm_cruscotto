@@ -28,16 +28,18 @@
     wheels_pressure_rst:        .ascii "Pressione gomme resettata\n"
     wheels_pressure_rst_len:    .long . - wheels_pressure_rst
 
-    ind:                        .byte 1     # %ah
-    supervisor:                 .byte 0     # %al
-    door_lock:                  .byte 1     # %cl
-    back_home:                  .byte 1     # %bh
-    sub:                        .byte 0     # %bl
-    blinkers:                   .byte 3     # %ch
+    supervisor:                 .byte 0         # ah
+    ind:                        .byte 1         # al
+    sub:                        .byte 0         # bh
+    door_lock:                  .byte 1         # bl
+    back_home:                  .byte 1         # ch
+    blinkers:                   .byte 3         # cl
     blinkers_len:               .long . - blinkers
 
     val_print:                  .ascii ""
     val_print_length:           .long - val_print
+
+#-----------------------------------------------
 
 .section .text
     .global index_position_message
@@ -45,37 +47,36 @@
     .type index_position_message, @function       # function declaration
 
 index_position_message:
+    movb %ah, supervisor
+    movb %al, ind
+    movb %bh, sub
+    movb %bl, door_lock
+    movb %ch, back_home
+    movb %cl, blinkers
 
-    #movb %ah, ind
-    cmpl $1, %eax
+    cmpb $1, %al
     je is_1
-    cmpl $2, %eax
+    cmpb $2, %al
     je is_2
-    cmpl $3, %eax
+    cmpb $3, %al
     je is_3
-    cmpl $4, %eax
+    cmpb $4, %al
     je is_4
-    cmpl $5, %eax
+    cmpb $5, %al
     je is_5
-    cmpl $6, %eax
+    cmpb $6, %al
     je is_6
-    cmpl $7, %eax
+    cmpb $7, %al
     je is_7
-    cmpl $8, %eax
+    cmpb $8, %al
     je is_8
 
+#-----------------------------------------------
 
 is_1:
-    movb %al, supervisor
-    cmpl $1, %ebx
+    cmpb $1, %ah
     je is_supervisor
-
-    movl set_auto, %eax
-    movl %eax, val_print
-    movl set_auto_len, %ebx
-    movl %ebx, val_print_length
-    jmp print
-    ret
+    jmp not_supervisor
 
 is_supervisor:
     movl set_auto_s, %eax
@@ -83,27 +84,40 @@ is_supervisor:
     movl set_auto_s_len, %ebx
     movl %ebx, val_print_length
     jmp print
-    ret
-############################################################
+    jmp return
+
+not_supervisor:
+    movl set_auto, %eax
+    movl %eax, val_print
+    movl set_auto_len, %ebx
+    movl %ebx, val_print_length
+    jmp print
+    jmp return
+
+#-----------------------------------------------
+
 is_2:
     movl date, %eax
     movl %eax, val_print
     movl date_len, %ebx
     movl %ebx, val_print_length
     jmp print
-    ret
-############################################################
+    jmp return
+
+#-----------------------------------------------
+
 is_3:
     movl time, %eax
     movl %eax, val_print
     movl time_len, %ebx
     movl %ebx, val_print_length
     jmp print
-    ret
-###########################################################
+    jmp return
+
+#-----------------------------------------------
+
 is_4:
-    movb %bl, sub
-    cmpl $1, %ecx   # %bl has sub
+    cmpb $1, %bh
     call move
     cmpl $1, %eax   # return of move up down on %eax
     je change_door_lock
@@ -133,7 +147,9 @@ door_lock_set:
     movb door_lock, %cl
     movb $0, %bl        # sub to 0
     ret
-############################################################
+
+#-----------------------------------------------
+
 is_5:
     movb %bl, sub
     cmpl $1, %ecx   # %bl has sub
@@ -166,7 +182,9 @@ back_home_set:
     movb back_home, %bh
     movb $0, %bl        # sub to 0
     ret
-############################################################
+
+#-----------------------------------------------
+
 is_6:
     movl check_oil, %eax
     movl %eax, val_print
@@ -174,7 +192,9 @@ is_6:
     movl %ebx, val_print_length
     jmp print
     ret
-############################################################
+
+#-----------------------------------------------
+
 is_7:
     movb %bl, sub
     movb %ch, blinkers
@@ -198,7 +218,8 @@ get_blinkers:
     movb $0, %bl
     movb blinkers, %ch
 
-############################################################
+#-----------------------------------------------
+
 is_8:
     movb %bl, sub
     cmpb $1, %bl
@@ -219,10 +240,22 @@ reset_pressure:
     movb $0, %bl        # sub to 0
     jmp print
 
-############################################################
+#-----------------------------------------------
+
 print:
     movl $4, %eax
 	movl $1, %ebx
 	leal val_print, %ecx
 	movl val_print_length, %edx
 	int $0x80
+
+#-----------------------------------------------
+
+return:
+    movb supervisor,    %ah
+    movb ind,           %al
+    movb sub,           %bh
+    movb door_lock,     %bl
+    movb back_home,     %ch
+    movb blinkers,      %cl
+    ret

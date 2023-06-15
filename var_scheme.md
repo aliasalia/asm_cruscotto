@@ -1,5 +1,20 @@
 # Registers - Variables associations
 
+## Variabili che vengono passate da un file all'altro:
+
+1. main -> index_position_message: supervisor
+2. main -> navigate_menu: supervisor
+3. navigate_menu -> index_position_message: supervisor
+4. 
+
+supervisor: .byte 0         # ah
+sup_code:   .ascii "2244"
+ind:        .byte 1         # al
+sub:        .byte 0         # bh
+door_lock:  .byte 1         # bl
+back_home:  .byte 1         # ch
+blinkers:   .byte 3         # cl
+
 ## move
 
 | return var    | registers     |
