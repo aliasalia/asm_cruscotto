@@ -15,6 +15,9 @@ door_lock:  .byte 1         # bl
 back_home:  .byte 1         # ch
 blinkers:   .byte 3         # cl
 
+is_up or is_down			# dh
+is_right					# dl
+
 ## move
 
 | return var    | registers     |

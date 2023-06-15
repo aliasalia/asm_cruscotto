@@ -47,13 +47,9 @@
     .type index_position_message, @function       # function declaration
 
 index_position_message:
-    movb %ah, supervisor
-    movb %al, ind
-    movb %bh, sub
-    movb %bl, door_lock
-    movb %ch, back_home
-    movb %cl, blinkers
+    jmp initiate
 
+go_on:
     cmpb $1, %al
     je is_1
     cmpb $2, %al
@@ -83,7 +79,11 @@ is_supervisor:
     movl %eax, val_print
     movl set_auto_s_len, %ebx
     movl %ebx, val_print_length
-    jmp print
+    movl $4, %eax
+    movl $1, %ebx
+    leal val_print, %ecx
+    movl val_print_length, %edx
+    int $0x80
     jmp return
 
 not_supervisor:
@@ -91,7 +91,11 @@ not_supervisor:
     movl %eax, val_print
     movl set_auto_len, %ebx
     movl %ebx, val_print_length
-    jmp print
+    movl $4, %eax
+    movl $1, %ebx
+    leal val_print, %ecx
+    movl val_print_length, %edx
+    int $0x80
     jmp return
 
 #-----------------------------------------------
@@ -101,7 +105,11 @@ is_2:
     movl %eax, val_print
     movl date_len, %ebx
     movl %ebx, val_print_length
-    jmp print
+    movl $4, %eax
+    movl $1, %ebx
+    leal val_print, %ecx
+    movl val_print_length, %edx
+    int $0x80
     jmp return
 
 #-----------------------------------------------
@@ -111,77 +119,114 @@ is_3:
     movl %eax, val_print
     movl time_len, %ebx
     movl %ebx, val_print_length
-    jmp print
+    movl $4, %eax
+    movl $1, %ebx
+    leal val_print, %ecx
+    movl val_print_length, %edx
+    int $0x80
     jmp return
 
 #-----------------------------------------------
 
 is_4:
     cmpb $1, %bh
+    je is_sub_door
+    cmpb $1, door_lock
+    je print_door_lock_on
+    jmp print_door_lock_off
+
+is_sub_door:
+    movb $0, sub
     call move
-    cmpl $1, %eax   # return of move up down on %eax
+    cmpb $1, %dh   # return of move up down on %dh
     je change_door_lock
-    cmpl $0, %eax
+    cmpb $0, %dh
     je change_door_lock
 
 change_door_lock:
-    movb %cl, door_lock
-    cmpl $1, %edx   # %cl has the current value of door_lock
-    je door_lock_set
-
-    movl door_lock_off, %eax
-    movl %eax, val_print
-    movl door_lock_off_len, %ebx
-    movl %ebx, val_print_length
-    jmp print
-    movb door_lock, %cl
-    movb $0, %bl        # sub to 0
-    ret
+    cmpb $1, %bl   # %bl has the current value of door_lock
+    jne door_lock_set
+    movb $0, door_lock
+    jmp print_door_lock_off
 
 door_lock_set:
+    movb $1, door_lock
+    jmp print_door_lock_on
+
+print_door_lock_on:
     movl door_lock_on, %eax
     movl %eax, val_print
     movl door_lock_on_len, %ebx
     movl %ebx, val_print_length
-    jmp print
-    movb door_lock, %cl
-    movb $0, %bl        # sub to 0
-    ret
+    movl $4, %eax
+    movl $1, %ebx
+    leal val_print, %ecx
+    movl val_print_length, %edx
+    int $0x80
+    jmp return
+
+print_door_lock_off:
+    movl door_lock_off, %eax
+    movl %eax, val_print
+    movl door_lock_off_len, %ebx
+    movl %ebx, val_print_length
+    movl $4, %eax
+    movl $1, %ebx
+    leal val_print, %ecx
+    movl val_print_length, %edx
+    int $0x80
+    jmp return
 
 #-----------------------------------------------
 
 is_5:
-    movb %bl, sub
-    cmpl $1, %ecx   # %bl has sub
+    cmpb $1, %ch
+    je is_sub_home
+    cmpb $1, back_home
+    je print_back_home_on
+    jmp print_back_home_off
+
+is_sub_home:
+    movb $0, sub
     call move
-    cmpl $1, %eax   # return of move up down on %eax
+    cmpb $1, %dh   # return of move up down on %dh
     je change_back_home
-    cmpl $0, %eax
+    cmpb $0, %dh
     je change_back_home
 
 change_back_home:
-    movb %bh, back_home
-    cmpl $1, %edx   # %edx has the current value of back_home
-    je back_home_set
-
-    movl back_home_off, %eax
-    movl %eax, val_print
-    movl back_home_off_len, %ebx
-    movl %ebx, val_print_length
-    jmp print
-    movb back_home, %bh
-    movb $0, %bl        # sub to 0
-    ret
+    cmpb $1, %ch   # %bl has the current value of back_home
+    jne back_home_set
+    movl $0, back_home
+    jmp print_back_home_off
 
 back_home_set:
+    movb $1, back_home
+    jmp print_back_home_on
+
+print_back_home_on:
     movl back_home_on, %eax
     movl %eax, val_print
     movl back_home_on_len, %ebx
     movl %ebx, val_print_length
-    jmp print
-    movb back_home, %bh
-    movb $0, %bl        # sub to 0
-    ret
+    movl $4, %eax
+    movl $1, %ebx
+    leal val_print, %ecx
+    movl val_print_length, %edx
+    int $0x80
+    jmp return
+
+print_back_home_off:
+    movl back_home_off, %eax
+    movl %eax, val_print
+    movl back_home_off_len, %ebx
+    movl %ebx, val_print_length
+    movl $4, %eax
+    movl $1, %ebx
+    leal val_print, %ecx
+    movl val_print_length, %edx
+    int $0x80
+    jmp return
 
 #-----------------------------------------------
 
@@ -190,47 +235,63 @@ is_6:
     movl %eax, val_print
     movl check_oil_len, %ebx
     movl %ebx, val_print_length
-    jmp print
-    ret
+    movl $4, %eax
+    movl $1, %ebx
+    leal val_print, %ecx
+    movl val_print_length, %edx
+    int $0x80
+    jmp return
 
 #-----------------------------------------------
 
 is_7:
-    movb %bl, sub
-    movb %ch, blinkers
-    cmpb $1, %bl
-    call get_blinkers
+    cmpb $1, %bh # %bh has sub
+    je get_blinkers
+
     movl blinkers_n, %eax
     movl %eax, val_print
     movl blinkers_n_len, %ebx
     movl %ebx, val_print_length
-    jmp print
+    movl $4, %eax
+    movl $1, %ebx
+    leal val_print, %ecx
+    movl val_print_length, %edx
+    int $0x80
+
+    
     movl blinkers, %eax
+    addl $256, %eax     # to string
+    addl $48, %eax
     movl %eax, val_print
-    movl blinkers_len, %ebx
+    movl blinkers_len, %ebx  ## maybe error
     movl %ebx, val_print_length
-    jmp print
-    ret
+    movl $4, %eax
+    movl $1, %ebx
+    leal val_print, %ecx
+    movl val_print_length, %edx
+    int $0x80
+    jmp return
 
 get_blinkers:
     call set_blinkers
-    movl %ecx, blinkers
-    movb $0, %bl
-    movb blinkers, %ch
-
+    movb %dl, blinkers ##maybe error
+    movb $0, sub
 #-----------------------------------------------
 
 is_8:
-    movb %bl, sub
-    cmpb $1, %bl
-    call reset_pressure
+    cmpb $1, %bh
+    je reset_pressure
     movl wheels_pressure, %eax
     movl %eax, val_print
     movl wheels_pressure_len, %ebx
     movl %ebx, val_print_length
-    jmp print
-    movb $0, %bl        # sub to 0
-    ret
+    movl $4, %eax
+    movl $1, %ebx
+    leal val_print, %ecx
+    movl val_print_length, %edx
+    int $0x80
+    movb $0, sub        # sub to 0
+    jmp return
 
 reset_pressure:
     movl wheels_pressure_rst, %eax
@@ -238,16 +299,22 @@ reset_pressure:
     movl wheels_pressure_rst_len, %ebx
     movl %ebx, val_print_length
     movb $0, %bl        # sub to 0
-    jmp print
+    movl $4, %eax
+    movl $1, %ebx
+    leal val_print, %ecx
+    movl val_print_length, %edx
+    int $0x80
 
 #-----------------------------------------------
 
-print:
-    movl $4, %eax
-	movl $1, %ebx
-	leal val_print, %ecx
-	movl val_print_length, %edx
-	int $0x80
+initiate:
+    movb %ah, supervisor
+    movb %al, ind
+    movb %bh, sub
+    movb %bl, door_lock
+    movb %ch, back_home
+    movb %cl, blinkers
+    jmp go_on
 
 #-----------------------------------------------
 

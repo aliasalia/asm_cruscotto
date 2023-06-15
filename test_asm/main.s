@@ -27,6 +27,7 @@ _start:
     movb blinkers,      %cl
 
     call index_position_message
+
     jmp loop
 
 maybe_supervisor:
@@ -41,22 +42,9 @@ is_supervisor:
     movb %ah, supervisor
 
 loop:
-    movb supervisor,    %ah
-    movb ind,           %al
-    movb sub,           %bh
-    movb door_lock,     %bl
-    movb back_home,     %ch
-    movb blinkers,      %cl
+    call navigate_menu
 
-    #call navigate_menu
-
-    #movb %eax, ind
-    #movb %ebx, supervisor
-    #movb %cl, door_lock
-    #movb %bh, back_home
-    #movb %ecx, sub
-    #movb %ch, blinkers
-    #jmp loop
+    jmp loop
 
 end:
     xorl %eax, %eax			# azzero %eax
