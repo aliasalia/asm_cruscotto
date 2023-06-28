@@ -28,16 +28,16 @@ int move() {
 }
 
 void set_blinkers() {
-    int n;
-    char tmp;
-    scanf("%d", &n);
+    char tmp, c;
+    printf("Quante volte devono lampeggiare le frecce? ");
+    scanf("%c", &c);
     scanf("%c", &tmp);
-    if (n > 5)
+    if (c > 53)
         blinkers = 5;
-    else if (n < 2)
+    else if (c < 50)
         blinkers = 2;
     else
-        blinkers = n;
+        blinkers = c - 48;
 }
 
 void index_position_message(int supervisor) {
@@ -56,6 +56,7 @@ void index_position_message(int supervisor) {
             break;
         case 4:
             if (sub) {
+                printf("Clicca SU o GIU': ");
                 int read = move();
                 if (read == -1 || read == 1)
                     door_lock = !door_lock;
@@ -68,6 +69,7 @@ void index_position_message(int supervisor) {
             break;
         case 5:
             if (sub) {
+                printf("Clicca SU o GIU': ");
                 int read = move();
                 if (read == -1 || read == 1)
                     back_home = !back_home;
@@ -83,6 +85,7 @@ void index_position_message(int supervisor) {
             break;
         case 7:
             if (sub) {
+                printf("inside sub blinkers\n");
                 set_blinkers();
                 sub = 0;
             }
