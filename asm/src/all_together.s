@@ -11,6 +11,9 @@
     door_lock:  .byte 1         
     back_home:  .byte 1         
     blinkers:   .byte 3       
+
+    throw_error:                 .ascii "an error occured"
+    throw_error_len:             .long . - throw_error
     # -----------index_position_message------------------
     set_auto_s:                 .ascii "1. Setting automobile (supervisor): "
     set_auto_s_len:             .long . - set_auto_s
@@ -38,6 +41,8 @@
     wheels_pressure_rst_len:    .long . - wheels_pressure_rst  
     # --------------navigate_menu-------------
     max:        .byte 6
+    # ------------set_blinkers------------------
+    c:          .ascii "0"
 
 .section .text
     .global _start
@@ -91,6 +96,7 @@ index_position_message:
     je is_7
     cmpb $8, %bl
     je is_8
+    jmp error
 
 #-----------------------------------------------
 
@@ -148,7 +154,7 @@ is_4:
 
 is_sub_door:
     movb $0, sub
-    # call move               #TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    call move
     cmpb $1, %dl   # return of move up down
     je change_door_lock
     cmpb $0, %dl
@@ -194,7 +200,7 @@ is_5:
 
 is_sub_home:
     movb $0, sub
-    #call move           #TODO !!!!!!!!
+    call move
     cmpb $1, %dl   # return of move up down on %dh
     je change_back_home
     cmpb $0, %dl
@@ -247,8 +253,10 @@ is_7:
     jmp print_blinkers
 
 get_blinkers:
-    #call set_blinkers  # TODO !!!!!!!!!!!!!!!!!!
-    movl %edx, blinkers ##maybe error
+    jmp set_blinkers
+
+go_on_blinkers:
+    movb %dl, blinkers ##maybe error
     movb $0, sub
     jmp print_blinkers
 
@@ -299,22 +307,25 @@ navigate_menu:
     je is_supervisor_navigate
 
 go_on:
-    #call move      # TODO !!!!!!!!!!!!
-    movb %dl, sub           # get from %dl 1 if is submenu
-    cmpb $1, %dl
+    call move      
+    movb %cl, sub           # get from %dl 1 if is submenu
+    cmpb $1, %cl
     jne up_down
+    jmp index_position_message
 
 is_supervisor_navigate:
     movb $8, max
     jmp go_on
 
 up_down:
-    cmpb $1, %dh    # 1 or 0 in dh if up or down
+    cmpb $1, %dl    # 1 or 0 in dh if up or down
     je increment
     jmp decrement
 
 increment:
+    xorl %edx, %edx
     movb max, %dl
+    xorl %eax, %eax
     movb ind, %al
     cmpb %dl, %al
     je is_max
@@ -330,7 +341,8 @@ not_max:
     jmp index_position_message
 
 decrement:
-    movb max, %dl
+    xorl %edx, %edx
+    movb ind, %dl
     cmpb $1, %dl
     je is_top
     jmp not_top
@@ -341,6 +353,48 @@ is_top:
     jmp index_position_message
 
 not_top:
-    dec %al     # subtract 1 to current index
-    movb %al, ind
+    decb %dl     # subtract 1 to current index
+    movb %dl, ind
     jmp index_position_message
+
+# -----------------set_blinkers--------------------
+set_blinkers:
+    movl $3, %eax           
+    movl $0, %ebx
+    leal c, %edx
+    movl $1, %edx
+    int $0x80               
+
+    xorl %edx, %edx
+    movl c, %edx
+    subl $48, %edx
+
+    cmpb $5, %dl
+    jg  greater_5
+    jmp maybe_less_2
+
+greater_5:
+    movb $5, %dl  ## maybe error
+    jmp go_on_blinkers
+
+maybe_less_2:
+    cmp $2, %dl
+    jl  less_2
+    jmp go_on_blinkers     # is between
+
+less_2:
+    movb $2, %dl ## maybe error
+    jmp go_on_blinkers
+
+# ------------------- error -----------------------
+error:
+    movl $4, %eax
+    movl $1, %ebx
+    leal throw_error, %ecx
+    movl throw_error_len, %edx
+    int $0x80
+
+    xorl %eax, %eax			
+    inc %eax			     
+	xorl %ebx, %ebx			 
+	int $0x80
