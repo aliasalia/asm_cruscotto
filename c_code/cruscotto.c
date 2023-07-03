@@ -85,7 +85,6 @@ void index_position_message(int supervisor) {
             break;
         case 7:
             if (sub) {
-                printf("inside sub blinkers\n");
                 set_blinkers();
                 sub = 0;
             }
