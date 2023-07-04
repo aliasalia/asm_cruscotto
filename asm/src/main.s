@@ -4,15 +4,17 @@
 
 .section .data
     # -----------main--------------
-    supervisor: .byte 0         
+    supervisor: .byte 0
     sup_code:   .ascii "2244"
-    ind:        .byte 1         
-    sub:        .byte 0         
-    door_lock:  .byte 1         
-    back_home:  .byte 1         
-    blinkers:   .byte 3   
+    ind:        .byte 1
+    submenu:    .byte 0
+    door_lock:  .byte 1
+    back_home:  .byte 1
+    blinkers:   .byte 3
 
-    print:      .ascii "0"    
+    tmp:        .ascii ""
+    tmp_len:    .long - tmp
+    print:      .ascii "0"
 
     throw_error:                 .ascii "an error occured"
     throw_error_len:             .long . - throw_error
@@ -43,7 +45,7 @@
     wheels_pressure_rst_len:    .long . - wheels_pressure_rst
     click_up_down:              .ascii "Clicca SU o GIU': "
     click_up_down_len:          .long . - click_up_down
-    # --------------navigate_menu-------------
+    # --------------navigate_menu---------------
     max:                        .byte 6
     # ------------set_blinkers------------------
     c:                          .ascii "0"
@@ -60,8 +62,8 @@ _start:
 
 first_message:
     # uncomment the following line to test supervisor mode
-    #movb $1, %al
-    # movb %al, supervisor
+    movb $1, %al
+    movb %al, supervisor
     jmp index_position_message
 
 maybe_supervisor:
@@ -158,7 +160,7 @@ is_3:
 #-----------------------------------------------
 
 is_4:
-    movb sub, %bl
+    movb submenu, %bl
     cmpb $1, %bl
     je is_sub_door
     movb door_lock, %cl
@@ -174,7 +176,7 @@ is_sub_door:
     movl click_up_down_len, %edx
     int $0x80
     # end print of click_up_down
-    movb $0, sub
+    movb $0, submenu
     call move
     cmpb $1, %dl   # return of move up down
     je change_door_lock
@@ -211,7 +213,7 @@ print_door_lock_off:
 #-----------------------------------------------
 
 is_5:
-    movb sub, %bl
+    movb submenu, %bl
     cmpb $1, %bl
     je is_sub_home
     movb back_home, %bl
@@ -227,7 +229,7 @@ is_sub_home:
     movl click_up_down_len, %edx
     int $0x80
     # end print of click_up_down
-    movb $0, sub
+    movb $0, submenu
     call move
     cmpb $1, %dl   # return of move up down on %dh
     je change_back_home
@@ -274,14 +276,14 @@ is_6:
 #-----------------------------------------------
 
 is_7:
-    movb sub, %bl
-    cmpb $1, %bl # %bl has sub
+    movb submenu, %bl
+    cmpb $1, %bl # %bl has submenu
     je set_blinkers
 
     jmp print_blinkers
 
 go_on_blinkers:
-    movb $0, sub
+    movb $0, submenu
     movb %dl, blinkers
     jmp print_blinkers
 
@@ -307,7 +309,7 @@ print_blinkers:
 #-----------------------------------------------
 
 is_8:
-    movb sub, %bl
+    movb submenu, %bl
     cmpb $1, %bl
     je reset_pressure
     movl $4, %eax
@@ -318,7 +320,7 @@ is_8:
     jmp loop
 
 reset_pressure:
-    movb $0, sub        # sub to 0
+    movb $0, submenu        # submenu to 0
     movl $4, %eax
     movl $1, %ebx
     leal wheels_pressure_rst, %ecx
@@ -333,21 +335,10 @@ navigate_menu:
     cmpb $1, %al
     # je is_supervisor_navigate
     call move      
-    movb %cl, sub           # get from %dl 1 if is submenu
+    movb %cl, submenu           # get from %dl 1 if is submenu
     cmpb $1, %cl
     jne up_down
     jmp index_position_message
-
-# is_supervisor_navigate:
-#    # xor %eax, %eax
-#    # movb $8, %al
-#    # movb %al, max
-#
-#    call move      
-#    movb %cl, sub           # get from %dl 1 if is submenu
-#    cmpb $1, %cl
-#    jne up_down
-#    jmp index_position_message
 
 up_down:
     cmpb $1, %dl    # 1 or 0 in dh if up or down
@@ -403,6 +394,12 @@ set_blinkers:
     movl $0, %ebx
     leal c, %ecx
     movl $1, %edx
+    int $0x80
+
+    movl $3, %eax           
+    movl $0, %ebx
+    leal tmp, %ecx
+    movl tmp_len, %edx
     int $0x80
 
     xorl %edx, %edx
