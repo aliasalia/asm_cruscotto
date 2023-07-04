@@ -62,8 +62,8 @@ _start:
 
 first_message:
     # uncomment the following line to test supervisor mode
-    movb $1, %al
-    movb %al, supervisor
+    #movb $1, %al
+    #movb %al, supervisor
     jmp index_position_message
 
 maybe_supervisor:
@@ -326,7 +326,7 @@ reset_pressure:
     leal wheels_pressure_rst, %ecx
     movl wheels_pressure_rst_len, %edx
     int $0x80
-    jmp loop
+    jmp index_position_message
 
 # ************************************************************
 
