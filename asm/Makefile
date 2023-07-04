@@ -1,4 +1,4 @@
-EXE= eseguibile
+EXE= cruscotto
 AS= as --32
 LD= ld -m elf_i386
 FLAGS= -gstabs
@@ -13,4 +13,4 @@ obj/move.o: src/move.s
 
 clean:
 	rm -f obj/*.o $(EXE) core
-	rm -f bin/eseguibile $(EXE) core
+	rm -f bin/cruscotto $(EXE) core

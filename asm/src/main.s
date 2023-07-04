@@ -62,8 +62,8 @@ _start:
 
 first_message:
     # uncomment the following line to test supervisor mode
-    #movb $1, %al
-    #movb %al, supervisor
+    # movb $1, %al
+    # movb %al, supervisor
     jmp index_position_message
 
 maybe_supervisor:
@@ -176,6 +176,7 @@ is_sub_door:
     movl click_up_down_len, %edx
     int $0x80
     # end print of click_up_down
+
     movb $0, submenu
     call move
     cmpb $1, %dl   # return of move up down
@@ -229,6 +230,7 @@ is_sub_home:
     movl click_up_down_len, %edx
     int $0x80
     # end print of click_up_down
+
     movb $0, submenu
     call move
     cmpb $1, %dl   # return of move up down on %dh
@@ -333,7 +335,6 @@ reset_pressure:
 navigate_menu:
     movb supervisor, %al
     cmpb $1, %al
-    # je is_supervisor_navigate
     call move      
     movb %cl, submenu           # get from %dl 1 if is submenu
     cmpb $1, %cl
